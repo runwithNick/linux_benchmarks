@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# probably best to run with sudo
+
 # This file sets up and runs net_test.sh in server mode on a machine and then tests with the local machine.
 # Next disk_test.sh is run.
 # Lastly, seeker test is done on the local machine.
