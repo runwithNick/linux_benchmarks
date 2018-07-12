@@ -86,6 +86,7 @@ echo ""
 echo "... Done"
 # hostname notes
 # expanse-bdms.invidi.com has different login credentials
+
 # expanse-etl.invidi.com
 # expanse-etl2.invidi.com
 # expanse-jetty.invidi.com
