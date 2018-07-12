@@ -1,4 +1,4 @@
-!/bin/bash -x
+#!/bin/bash
 
 # NOTES AND GENERAL INFO
 # REQUIRES PSSH (Parallel SSH)

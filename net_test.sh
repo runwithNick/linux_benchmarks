@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 # Path to qperf
 qperf=qperf-0.4.9/src/qperf
@@ -55,17 +55,16 @@ sudo firewall-cmd --add-port=19865/tcp --timeout=1h
 if [ $# -eq 0 ]; then
 	# IF THERE IS NO INPUT ARGS, USE SERVER MODE
 	printf "\nStarting qperf in server mode ...\n"
-	qperf-0.4.9/src/qperf
+	$qperf
 elif [ $# -eq 1 ]; then
 	# IF THERE IS 1 INPUT ARG, USE QPERF NORMALLY.
 	IP=$1
-	printf "\n\nRunning qperf on IP: $1 ...\n\n"
+	printf "\n\nRunning qperf on IP: $IP ...\n\n"
 	# IF VERBOSE IS TRUE, SHOW DETAILED OUTPUT
 	if [ $verbose ]; then
-		$qperf -to $timeout -t $time -v -ip $socketPort -lp $listenPort $IP tcp_bw tcp_lat | net_test_results.log
+		$qperf -to $timeout -t $time -v -ip $socketPort -lp $listenPort $IP tcp_bw tcp_lat | tee net_test_results.log
 	else
 		$qperf -to $timeout -t $time -ip $socketPort -lp $listenPort $IP tcp_bw tcp_lat | tee net_test_results.log
 	fi
+	echo "... Done"
 fi
-
-printf "\n... Done. Output also availible in benchmarking/net_test_results.log\n\n"
