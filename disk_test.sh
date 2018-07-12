@@ -4,8 +4,11 @@
 # REQUIRES PSSH (Parallel SSH)
 # sudo apt install pssh
 
+# REQUIRES fio
+# sudo apt-get install fio
+
 # CONFIGURABLES
-testSize="100M"
+# testSize="100M"
 
 # Hosts are defined in the pssh-hosts file
 
@@ -30,7 +33,7 @@ if [ "$1" == "-l" ]; then
 	echo "Running Local Disk Test ... "
 	echo ""
 	echo "Results:"
-	fio -randrepeat=1 -ioengine=libaio -direct=1 -gtod_reduce=1 -name=test -filename=test -iodepth=64 -size=$testSize --readwrite=randrw --rwmixread=75 | awk '/sda/' > logs/LocalMachine.log
+	fio -randrepeat=1 -ioengine=libaio -direct=1 -gtod_reduce=1 -name=test -filename=test -iodepth=64 -size=100M --readwrite=randrw --rwmixread=75 | awk '/sda/' > logs/LocalMachine.log
 	echo ""
 	echo "... Done"
 	exit 1
@@ -48,21 +51,22 @@ if [ "$1" != "-l" ]; then
 	echo ""
 
 	# Using PSSH navigate to benchmarking directory,
+	# install fio
 	# do fio test
 	# then scp resulting log file back to ~/Desktop/benchmarking directory.
-	pssh -t 300 -O StrictHostKeyChecking=no -h pssh-hosts -l invidi -A -o '`hostname.log`' 'mkdir -p benchmarking; cd benchmarking; fio -randrepeat=1 -ioengine=libaio -direct=1 -gtod_reduce=1 -name=test -filename=test -iodepth=64 -size=$testSize --readwrite=randrw --rwmixread=75 | awk "/sda/" > `hostname`.log'
+	pssh -i -t 300 -O StrictHostKeyChecking=no -h pssh-hosts -l invidi -A -o '`hostname.log`' 'mkdir -p benchmarking; cd benchmarking; fio -randrepeat=1 -ioengine=libaio -direct=1 -gtod_reduce=1 -name=test -filename=test -iodepth=64 -size=100M --readwrite=randrw --rwmixread=75 | awk "/sda/" > `hostname`.log'
 
 	# for each MACHINE in MACHINES, scp the .log file back
 	for MACHINE in $MACHINES ; do
 		echo ""
 		echo "SCP log from $MACHINE"
-		scp "invidi@$MACHINE":~/benchmarking/*.log ~/Desktop/benchmarking/logs/$MACHINE.log
+		scp "invidi@$MACHINE":~/benchmarking/*.log ~/Desktop/linux_benchmarks/logs/$MACHINE.log
 		echo ""
 	done
 
 	# Afterwards, do a local test.
 	# Test Sequential Read/Write (75% read) on local machine.
-	fio -randrepeat=1 -ioengine=libaio -direct=1 -gtod_reduce=1 -name=test -filename=test -iodepth=64 -size=$testSize --readwrite=randrw --rwmixread=75 | awk '/sda/' > logs/LocalMachine.log
+	fio -randrepeat=1 -ioengine=libaio -direct=1 -gtod_reduce=1 -name=test -filename=test -iodepth=64 -size=100M --readwrite=randrw --rwmixread=75 | awk '/sda/' > logs/LocalMachine.log
 fi
 
 printf "\n\nSUMMARY"
