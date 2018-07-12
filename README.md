@@ -1,2 +1,9 @@
-# linux_networked_disk_benchmark
-A benchmarking script which uses pssh and fio to benchmark many linux servers in parallel.
+# linux_benchmarks
+Contains  benchmarking scripts.
+
+## net_test.sh
+Benchmarks network performance between two linux devices.
+
+## disk_test.sh
+Benchmarks disk performance on list of linux servers in parallel.
+Server lsits defined in pssh-hosts file.
