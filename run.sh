@@ -6,9 +6,9 @@
 # Next disk_test.sh is run.
 # Lastly, seeker test is done on the local machine.
 
-
 echo "NET TEST START ... "
 echo ""
+
 # net_test.sh server mode
 # Ask user for IP address input
 # echo "Enter the IP address or hostname of the machine you wish to run the net_test server: "
@@ -30,11 +30,8 @@ echo "net_test in progress ... "
 source net_test.sh $net_test_server_ip
 echo ""
 echo "NET TEST END"
+
 printf "\n\n\n"
-# NET TEST ENDS HERE
-
-
-
 
 # Do disk test
 echo "DISK TEST START ...  "
@@ -42,3 +39,12 @@ echo ""
 source disk_test.sh
 echo ""
 echo "DISK TEST END"
+
+printf "\n\n\n"
+
+# Do seeker test
+echo "SEEKER TEST START ...  "
+echo ""
+source seeker_test.sh
+echo ""
+echo "SEEKER TEST END"
