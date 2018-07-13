@@ -22,12 +22,12 @@ echo "Delivering latest version of net_test.sh and qperf-0.4.9"
 scp -r ~/Desktop/linux_benchmarks/qperf-0.4.9 ~/Desktop/linux_benchmarks/net_test.sh "invidi@$net_test_server_ip":~/benchmarking
 
 # Start server on IP provided
-ssh -n -f "invidi@$net_test_server_ip" "sh -c 'cd benchmarking; nohup bash net_test.sh > /dev/null 2>&1 &'"
+ssh -n -f "invidi@$net_test_server_ip" "sh -c 'cd benchmarking; nohup source net_test.sh > /dev/null 2>&1 &'"
 
 # Start net_test from local machine and connect with IP provided
 echo ""
 echo "net_test in progress ... "
-bash net_test.sh $net_test_server_ip
+source net_test.sh $net_test_server_ip
 echo ""
 echo "NET TEST END"
 printf "\n\n\n"
@@ -39,6 +39,6 @@ printf "\n\n\n"
 # Do disk test
 echo "DISK TEST START ...  "
 echo ""
-sudo bash disk_test.sh
+source disk_test.sh
 echo ""
 echo "DISK TEST END"

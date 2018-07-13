@@ -62,9 +62,9 @@ elif [ $# -eq 1 ]; then
 	printf "\n\nRunning qperf on IP: $IP ...\n\n"
 	# IF VERBOSE IS TRUE, SHOW DETAILED OUTPUT
 	if [ $verbose ]; then
-		$qperf -to $timeout -t $time -v -ip $socketPort -lp $listenPort $IP tcp_bw tcp_lat | tee net_test_results.log
+		"$qperf" -to "$timeout" -t "$time" -ip "$socketPort" -lp "$listenPort" -v "$IP" tcp_bw tcp_lat | tee net_test_results.log
 	else
-		$qperf -to $timeout -t $time -ip $socketPort -lp $listenPort $IP tcp_bw tcp_lat | tee net_test_results.log
+		"$qperf" -to "$timeout" -t "$time" -ip "$socketPort" -lp "$listenPort" "$IP" tcp_bw tcp_lat | tee net_test_results.log
 	fi
 	echo "... Done"
 fi
