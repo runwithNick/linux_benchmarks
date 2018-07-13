@@ -22,7 +22,7 @@ fi
 verbose=true
 
 # Set how long to run the test (Default 30 seconds)
-time=30
+time=5
 
 # Set timeout. This is the timeout used for various things
 # such as exchanging messages. (Default 5 seconds)
