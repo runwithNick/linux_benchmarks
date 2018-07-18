@@ -1,7 +1,18 @@
 #!/bin/bash
 
+# variables
+# is there a firewall and firewall-cmd
+FIREWALL=0
 # Path to qperf
 qperf=qperf-0.4.9/src/qperf
+
+err_handler()
+{
+    echo "ERROR on line $1"
+    exit 1
+}
+trap 'err_handler $LINENO' ERR
+
 
 # Checking for install of qperf
 if [ -z $qperf ] ; then
@@ -37,12 +48,13 @@ listenPort=19765
 # qperf uses port 19765 by default for listening.
 # This must be set to the same port on both the server and client machines.
 
-
-# ADDING PORTS TO FIREWALL FOR 1 HOUR
-printf "\nAdding port 19765 for 1 hour ... "
-sudo firewall-cmd --add-port=19765/tcp --timeout=1h
-printf "\nAdding port 19865 for 1 hour ... "
-sudo firewall-cmd --add-port=19865/tcp --timeout=1h
+if [ $FIREWALL -gt 0 ] ; then
+    # ADDING PORTS TO FIREWALL FOR 1 HOUR
+    printf "\nAdding port 19765 for 10 minutes ... "
+    sudo firewall-cmd --add-port=19765/tcp --timeout=1h
+    printf "\nAdding port 19865 for 10 minutes ... "
+    sudo firewall-cmd --add-port=19865/tcp --timeout=1h
+fi
 
 # When the script is run in server mode, the device begins to listen
 # for other devices to begin a test.

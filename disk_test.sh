@@ -10,7 +10,18 @@
 # CONFIGURABLES
 # testSize="100M"
 
+# config
+RUNAS=invidi
+TARGETHOME=/home/invidi
+
 # Hosts are defined in the pssh-hosts file
+
+err_handler()
+{
+    echo "ERROR on line $1"
+    exit 1
+}
+trap 'err_handler $LINENO' ERR
 
 mkdir -p logs
 mkdir -p logs/seekerLogs
@@ -22,82 +33,60 @@ echo "Starting Disk Test ... "
 echo ""
 
 filename=pssh-hosts
-MACHINES=""
-totalMachines=0
+MACHINES=`cat ${filename}`
 
-# Read pssh-hosts in
-while read -r line; do
-	let "totalMachines++"
-	MACHINES="$MACHINES $line"
-done < "$filename"
+echo "Running Networked Disk Test ... "
+echo ""
+echo "Participating Servers:"
+for MACHINE in $MACHINES ; do
+    echo $MACHINE
+done
 
-# If you want to only run a local test, add the -l flag.
-if [ "$1" == "-l" ]; then
-	# Run Fio test
-	echo "Running Local Disk Test ... "
-	echo ""
-	echo "Results:"
-	fio -randrepeat=1 -ioengine=libaio -direct=1 -gtod_reduce=1 -name=test -filename=test -iodepth=64 -size=100M --readwrite=randrw --rwmixread=75 | awk '/sda/' | tee logs/LocalMachine.log
-	echo ""
-	echo "... Done"
-	# Run seeker test
-	echo "Running Local Seeker Disk Test ... "
-	echo ""
-	sudo ./seeker /dev/sda | awk '/Results/' | tee logs/seekerLogs/LocalMachine.log
-	echo ""
-	echo "... Done"
-	exit 1
-fi
+# make directories
+echo "Making directories ..."
+#pssh -e "logs/errors/pssh" -i -t 300 -O StrictHostKeyChecking=no -h pssh-hosts -l $RUNAS -A 'HOSTNAME=`hostname` ; mkdir -p benchmarking; cd benchmarking'
+pssh -e "logs/errors/pssh" -i -t 300 -O StrictHostKeyChecking=no -h pssh-hosts -l $RUNAS -A 'HOSTNAME=`hostname` ; mkdir -p benchmarking; cd benchmarking'
+echo "... Done"
 
-# If local flag is not present, then perform networked disk test.
-if [ "$1" != "-l" ]; then
-	echo "Running Networked Disk Test ... "
-	echo ""
-	echo "Participating Servers:"
-	for MACHINE in $MACHINES ; do
-		echo $MACHINE
-	done
-	echo "TOTAL: $totalMachines"
-	echo ""
+# Parallel SCP seeker binary to all participating machines
+echo "Sending latesting Seeker binary to machines ... "
+parallel-scp -e "logs/errors/parallel-scp" -v -t 300 -h pssh-hosts -l $RUNAS -A "seeker" "${TARGETHOME}/benchmarking/seeker"
+echo "... Done"
 
-	# Parallel SCP seeker binary to all participating machines
-	echo "Sending latesting Seeker binary to machines ... "
-	parallel-scp -e "/errors/parallel-scp" -v -t 300 -h pssh-hosts -l invidi -A "~/Desktop/linux_benchmarks/seeker" "/home/invidi/benchmarking/seeker"
-	echo "... Done"
-	# Using PSSH navigate to benchmarking directory,
-	# install fio
-	# do fio test
-	# then scp resulting log file back to ~/Desktop/benchmarking directory.
-	echo "Running fio and seeker tests on machines ... "
-	pssh -e "/errors/pssh" -i -t 300 -O StrictHostKeyChecking=no -h pssh-hosts -l invidi -A 'mkdir -p benchmarking; cd benchmarking; fio -randrepeat=1 -ioengine=libaio -direct=1 -gtod_reduce=1 -name=test -filename=test -iodepth=64 -size=100M --readwrite=randrw --rwmixread=75 | awk "/sda/" > `hostname`.log; mkdir -p seekerLogs; cd seekerLogs; sudo ./seeker /dev/sda | awk "/Results/" > seekerLogs/`hostname`.log'
-	echo "... Done"
-	# for each MACHINE in MACHINES, scp the .log file back
-	for MACHINE in $MACHINES ; do
-		echo ""
-		echo "SCP fio log from $MACHINE"
-		scp "invidi@$MACHINE":~/benchmarking/*.log ~/Desktop/linux_benchmarks/logs/$MACHINE.log
-		echo "SCP seeker log from $MACHINE"
-		scp "invidi@$MACHINE":~/benchmarking/seekerLogs*.log ~/Desktop/linux_benchmarks/logs/seekerLogs/$MACHINE.log
-		echo ""
-	done
+# Using PSSH navigate to benchmarking directory,
+# do fio test
+# then scp resulting log file back to logs directory.
+# do seeker test, then get log back to logs/seekerLogs
+echo "Running fio and seeker tests on machines ... "
+pssh -e "logs/errors/pssh" -i -t 300 -O StrictHostKeyChecking=no -h pssh-hosts -l $RUNAS -A 'HOSTNAME=`hostname` ; cd benchmarking; fio -randrepeat=1 -ioengine=libaio -direct=1 -gtod_reduce=1 -name=test -filename=test -iodepth=64 -size=100M --readwrite=randrw --rwmixread=75 > ${HOSTNAME}.log; mkdir -p seekerLogs; sudo ./seeker /dev/sda > seekerLogs/${HOSTNAME}.log'
+echo "... Done"
 
-	# Afterwards, do a local test.
-	# Test Sequential Read/Write (75% read) on local machine.
-	fio -randrepeat=1 -ioengine=libaio -direct=1 -gtod_reduce=1 -name=test -filename=test -iodepth=64 -size=100M --readwrite=randrw --rwmixread=75 | awk '/sda/' > logs/LocalMachine.log
-fi
+# for each MACHINE in MACHINES, scp the .log file back
+for MACHINE in $MACHINES ; do
+    echo ""
+    echo "SCP fio log from $MACHINE"
+    scp -r "${RUNAS}@$MACHINE":benchmarking/*.log logs/$MACHINE.log
+    echo "SCP seeker log from $MACHINE"
+    scp -r "${RUNAS}@${MACHINE}":benchmarking/seekerLogs/*.log logs/seekerLogs/$MACHINE.log
+    echo ""
+done
 
 printf "\n\nSUMMARY"
 
 # PRINTING RESULTS
-printf "\n`hostname`\n"
-local_test_result=`awk -F',' '{ print }' logs/LocalMachine.log`
-printf "%s\n" "$local_test_result"
-
 for MACHINE in $MACHINES ; do
+	echo ""
+	echo "========"
 	printf "\n$MACHINE\n"
-	test_result_fio=`awk -F',' '{ print }' logs/$MACHINE.log`
-	test_result_seeker=`awk -F',' '{ print }' logs/seekerLogs/$MACHINE.log`
-	printf "%s\n" "$test_result"
+	echo ""
+	echo "   *** fio ***"
+	cat logs/$MACHINE.log
+	echo ""
+	echo "   *** seeker ***"
+	cat logs/seekerLogs/$MACHINE.log
+	echo ""
+	echo "--------"
+	echo ""
 done
 
 echo ""
