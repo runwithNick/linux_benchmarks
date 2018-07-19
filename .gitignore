@@ -4,3 +4,4 @@ logs
 pssh-hosts
 net_test_results.log
 LocalMachine.log
+logSets
