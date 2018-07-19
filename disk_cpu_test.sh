@@ -4,15 +4,14 @@
 # REQUIRES PSSH (Parallel SSH)
 # sudo apt install pssh
 
-# REQUIRES fio
-# sudo apt-get install fio
-
 # CONFIGURABLES
 # testSize="100M"
 
 # config
 RUNAS=invidi
 TARGETHOME=/home/invidi
+#RUNAS=capacity
+#TARGETHOME=/home/capacity
 
 # Hosts are defined in the pssh-hosts file
 
@@ -47,7 +46,6 @@ echo ""
 
 # make directories
 echo "Making directories ..."
-#pssh -e "logs/errors/pssh" -i -t 300 -O StrictHostKeyChecking=no -h pssh-hosts -l $RUNAS -A 'HOSTNAME=`hostname` ; mkdir -p benchmarking; cd benchmarking'
 pssh -e "logs/errors/pssh" -i -t 900 -O StrictHostKeyChecking=no -h pssh-hosts -l $RUNAS -A 'HOSTNAME=`hostname` ; mkdir -p benchmarking; cd benchmarking'
 echo "... Done"
 echo ""
@@ -62,7 +60,7 @@ echo ""
 # do fio test
 # then scp resulting log file back to logs directory.
 # do seeker test, then get log back to logs/seekerLogs
-echo "Install sysbench, and fio then -> Running fio, seeker, and sybench cpu tests on machines ... "
+echo "Install sysbench, and fio then -> Running fio, seeker, and sysbench cpu tests on machines ... "
 pssh -e "logs/errors/pssh" -i -t 300 -O StrictHostKeyChecking=no -h pssh-hosts -l $RUNAS -A 'sudo yum -y install sysbench; sudo yum -y install fio; HOSTNAME=`hostname`; cd benchmarking; mkdir -p fioLogs; fio -randrepeat=1 -ioengine=libaio -direct=1 -gtod_reduce=1 -name=test -filename=test -iodepth=64 -size=100M --readwrite=randrw --rwmixread=75 > fioLogs/${HOSTNAME}.log; mkdir -p seekerLogs; sudo ./seeker /dev/sda > seekerLogs/${HOSTNAME}.log; numCores=`grep -c ^processor /proc/cpuinfo`; mkdir -p cpuLogs; sysbench --test=cpu --num-threads="$numCores" run > cpuLogs/${HOSTNAME}.log'
 echo "... Done"
 echo ""
