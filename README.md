@@ -4,7 +4,7 @@ July 18th 2018
 
 ## disk_test.sh
 
-disk_test.sh utilizes a pssh-hosts file to run the disk test in parallel on on the hosts listed in pssh-hosts. The script should make new benchmarks in the future easier and quicker to perform. This performs a test with fio as well as a binary called seeker. The output for both tests is stored in logs on the host machines and are brought back to your local machine for review.
+disk_cpu_test.sh utilizes a pssh-hosts file to run disk and cpu tests in parallel on the hosts listed in pssh-hosts. The script should make new benchmarks in the future easier and quicker to perform. This performs a test with fio as well as a binary called seeker and finally, a cpu tst using sysbench. The output for both tests is stored in logs on the host machines and are brought back to your local machine for review
 
 ## net_test.sh
 
@@ -12,4 +12,4 @@ net_test.sh is a bit different than disk_test.sh. It is intended that net_test.s
 
 ## other
 
-Other scripts are included in the repo but are not necesary for running the benchmarks at this time. However, the intention would be to have a run.sh script that simply does everything. But due to time constraints, that implimentation has been put on hold.
+Other scripts are included in the repo but are not necesary for running the benchmarks at this time. However, the intention would be to have a run.sh script that simply does everything with little to no user input. But due to time constraints, that implimentation has been put on hold.
