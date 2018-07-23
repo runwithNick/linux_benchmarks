@@ -1,3 +1,7 @@
+# Example of Benchmark Run
+
+This MD file showcases some of the data you might expect to see when running the benchmark scripts.
+
 # Linux Disk and Networking Benchmark Tools
 July 18th 2018
 
