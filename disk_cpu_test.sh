@@ -8,10 +8,12 @@
 # testSize="100M"
 
 # config
-RUNAS=invidi
-TARGETHOME=/home/invidi
+#RUNAS=invidi
+#TARGETHOME=/home/invidi
 #RUNAS=capacity
 #TARGETHOME=/home/capacity
+RUNAS=nick
+TARGETHOME=/home/nick
 
 # Hosts are defined in the pssh-hosts file
 
@@ -56,10 +58,18 @@ parallel-scp -e "logs/errors/parallel-scp" -v -t 300 -h pssh-hosts -l $RUNAS -A 
 echo "... Done"
 echo ""
 
+#SUDO APT GET INSTALL VERSION
+#echo "Install sysbench, and fio then -> Running fio, seeker, and sysbench cpu tests on machines ... "
+#pssh -e "logs/errors/pssh" -i -t 120 -O StrictHostKeyChecking=no -h pssh-hosts -l $RUNAS -A -x "-t -t" 'echo NRB$%15bc | sudo -S apt-get -y install sysbench; echo NRB$%15bc | sudo -S apt-get -y install fio; HOSTNAME=`hostname`; cd benchmarking; mkdir -p fioLogs; fio -randrepeat=1 -ioengine=libaio -direct=1 -gtod_reduce=1 -name=test -filename=test -iodepth=64 -size=100M --readwrite=randrw --rwmixread=75 > fioLogs/${HOSTNAME}.log; mkdir -p seekerLogs; sudo ./seeker /dev/sda > #seekerLogs/${HOSTNAME}.log; numCores=`grep -c ^processor /proc/cpuinfo`; mkdir -p cpuLogs; sysbench --test=cpu --num-threads="$numCores" run > cpuLogs/${HOSTNAME}.log'
+#echo "... Done"
+#echo ""
+
 # Using PSSH navigate to benchmarking directory,
 # do fio test
 # then scp resulting log file back to logs directory.
 # do seeker test, then get log back to logs/seekerLogs
+
+#SUDO YUM INSTALL VERSION
 echo "Install sysbench, and fio then -> Running fio, seeker, and sysbench cpu tests on machines ... "
 pssh -e "logs/errors/pssh" -i -t 300 -O StrictHostKeyChecking=no -h pssh-hosts -l $RUNAS -A 'sudo yum -y install sysbench; sudo yum -y install fio; HOSTNAME=`hostname`; cd benchmarking; mkdir -p fioLogs; fio -randrepeat=1 -ioengine=libaio -direct=1 -gtod_reduce=1 -name=test -filename=test -iodepth=64 -size=100M --readwrite=randrw --rwmixread=75 > fioLogs/${HOSTNAME}.log; mkdir -p seekerLogs; sudo ./seeker /dev/sda > seekerLogs/${HOSTNAME}.log; numCores=`grep -c ^processor /proc/cpuinfo`; mkdir -p cpuLogs; sysbench --test=cpu --num-threads="$numCores" run > cpuLogs/${HOSTNAME}.log'
 echo "... Done"
