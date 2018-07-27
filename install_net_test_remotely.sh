@@ -3,10 +3,12 @@
 # SCP QPERF and net_test.sh to all machines to prepare machines to be sued in net_test.sh
 
 # config
-RUNAS=invidi
-TARGETHOME=/home/invidi
+#RUNAS=invidi
+#TARGETHOME=/home/invidi
 #RUNAS=capacity
 #TARGETHOME=/home/capacity
+RUNAS=nick
+TARGETHOME=/home/nick
 
 # Hosts are defined in the pssh-hosts file
 

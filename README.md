@@ -1,5 +1,7 @@
 # linux_benchmarks
 
+NOTE: This repo was moved to RunWithIt Reactor and continued development will occur there.
+
 Nicholas Borle
 July 23rd 2018
 
